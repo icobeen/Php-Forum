@@ -19,8 +19,8 @@ forum project, a sophisticated amalgamation of cutting-edge features. From robus
 In our project, we've implemented three crucial files dedicated to managing user sessions, handling environment variables, and enabling image uploads seamlessly within our PHP forum ecosystem.
 
 login.php serves as the entry point where users input their credentials. Upon successful authentication, users are directed to session.php, where their session is initiated, ensuring secure access to forum features. Additionally, our system meticulously tracks user activity, recording visit counts to enhance user engagement and analytical insights, here's an example of using environement variables :
-
-```<?php
+```php
+<?php
 if(empty($message)){ 
     if($username=="Ikram" && $password=="123"){
         session_start();
@@ -30,7 +30,7 @@ if(empty($message)){
 }
 ?>
 
-```<?php      
+<?php      
 session_start();
 error_reporting(~E_WARNING);
 
@@ -39,7 +39,7 @@ if($_SESSION["autoriser"]!="oui"){
     exit();
 }
 ?>
-```<?php
+<?php
 if(empty($message)){   
     if($username=="Ikram" && $password=="123"){
         session_start();
@@ -48,7 +48,78 @@ if(empty($message)){
     }
 }
 ?>
+```
 
 ## Uploading Files and Images
 
+This PHP script allows users to upload files and images to the server. Here's how it works:
 
+1. When a user submits a file through the form, the PHP script checks if the user is authorized by verifying the session variable `$_SESSION["autoriser"]`.
+2. If the user is not authorized, they are redirected to the login page to authenticate.
+3. The script checks the size and type of the uploaded file. It only allows files with the extensions `.jpeg` or `.png`, and the file size should not exceed 2MB.
+4. If the file passes the validation checks, it is moved to the `uploads` directory on the server with a filename based on the user's login.
+5. The user is then redirected to the `session.php` page.
+Here's a simplified version of the PHP code responsible for handling file uploads:
+```php
+<?php
+session_start();
+
+// Check if user is authorized
+if($_SESSION["autoriser"] != "oui"){
+    header("location:login.php");
+    exit();
+}
+
+// Check if file is uploaded
+if($_FILES["photo"]["size"] > 0){
+    // Validate file type and size
+    if(!preg_match("#jpeg$|png$#",$_FILES["photo"]["type"])) {
+        // Handle invalid file format
+        $message = "<div class='erreur erreur_photo'>Format du fichier invalide (JPG/JPEG ou PNG seulement)!</div>";
+    } elseif($_FILES["photo"]["size"] > 2000000) {
+        // Handle file size limit exceeded
+        $message = "<div class='erreur erreur_photo'>Fichier trop volumineux (Max: 2Mo)!</div>";
+    } else {
+        // Move uploaded file to uploads directory
+        move_uploaded_file($_FILES["photo"]["tmp_name"], "./uploads/" . $_SESSION["login"] . ".png");
+        header("location:./session.php");
+    }
+}
+?>
+
+```
+## date.php
+
+this script utilizes PHP's built-in functions to handle dates efficiently. It showcases techniques for processing user input, manipulating date values, and generating output messages based on the date input provided.
+-Features:
+Date Validation: Validates date input provided through a form submission.
+Date Parsing: Parses the date string into day, month, and year components.
+Date Conversion: Converts the date components into a human-readable format.
+Error Handling: Provides feedback in case of invalid date format.
+
+## Additional Information
+
+Additionally, there's functionality in the script to save personal information to a file.txt upon successful login to the session. Moreover, there's a code snippet provided below that counts and displays the number of times a website has been visited:
+```php
+<?php
+
+// Nom du fichier de compteur, Combien de fois une site est visitee
+session_start();
+$fp=fopen("cpt.txt", "r+");
+$str=fgets($fp);
+
+if ($_SESSION[' visited']!="yes") {
+
+	// code...
+	$str++;
+	fseek($fp,0);
+	fputs($fp,$str);
+	
+	$_SESSION['deja visitee']="oui";
+}
+
+echo $str;
+?>
+
+
+```
